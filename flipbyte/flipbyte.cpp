@@ -43,6 +43,6 @@ int main(int argc, char* argv[])
 		reversedNumber <<= 1;
 		reversedNumber |= ((number >> i) & 0x01);
 	}
-	cout << +reversedNumber << endl;
+	cout << to_string(reversedNumber) << endl;
 	return 0;
 }
