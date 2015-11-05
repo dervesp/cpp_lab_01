@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: flipbyte.exe <0-255>" << endl;
+		cout << "Usage: flipbyte.exe <" + to_string(MIN_VALUE) + ", " + to_string(MAX_VALUE) + ">" << endl;
 		return 1;
 	}
 	string numberAsString = argv[1];
@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
 
 Number ParseNumberFromString(const string numberAsString, ParseNumberError & error)
 {
-	int intNumber = 0;
-	Number number = 0;
+	int intNumber = MIN_VALUE;
+	Number number = MIN_VALUE;
 	error = ParseNumberError::NoError;
 
 	try
@@ -85,7 +85,7 @@ string GetParseNumberErrorAsString(const ParseNumberError & error)
 			errorString = "Error: argument must be a number";
 			break;
 		case ParseNumberError::OutOfRange:
-			errorString = "Error: number must be in range <0, " + to_string(MAX_VALUE) + ">";
+			errorString = "Error: number must be in range <" + to_string(MIN_VALUE) + ", " + to_string(MAX_VALUE) + ">";
 			break;
 		default:
 			errorString = "Error: unknown error";
