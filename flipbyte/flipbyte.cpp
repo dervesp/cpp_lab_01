@@ -4,45 +4,103 @@
 
 using namespace std;
 
+typedef uint8_t Number;
+const auto BIT_NUMBER = 8;
+const auto MIN_VALUE = 0;
+const auto MAX_VALUE = pow(2, BIT_NUMBER) - 1;
+
+enum class ParseNumberError {
+	NoError,
+	NotANumber,
+	OutOfRange
+};
+
+Number ParseNumberFromString(const string numberAsString, ParseNumberError & error);
+string GetParseNumberErrorAsString(const ParseNumberError & error);
+Number FlipNumber(const Number & number);
+
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Correct usage: flipbyte.exe <0-255>" << endl;
+		cout << "Usage: flipbyte.exe <0-255>" << endl;
 		return 1;
 	}
 	string numberAsString = argv[1];
-	int intNumber;
+
+	ParseNumberError error = ParseNumberError::NoError;
+	Number originNumber = ParseNumberFromString(numberAsString, error);
+	if (error != ParseNumberError::NoError)
+	{
+		cout << GetParseNumberErrorAsString(error) << endl;
+		return 1;
+	}
+	else
+	{
+		int flippedNumber = FlipNumber(originNumber);
+		cout << to_string(flippedNumber) << endl;
+	}
+	return 0;
+}
+
+Number ParseNumberFromString(const string numberAsString, ParseNumberError & error)
+{
+	int intNumber = 0;
+	Number number = 0;
+	error = ParseNumberError::NoError;
 
 	try
 	{
 		intNumber = stoi(numberAsString);
+		if ((intNumber < MIN_VALUE) || (intNumber > MAX_VALUE))
+		{
+			error = ParseNumberError::OutOfRange;
+		}
+		else
+		{
+			number = static_cast<Number>(intNumber);
+		}
 	}
-	catch (const invalid_argument& e)
+	catch (const invalid_argument & e)
 	{
-		cout << "Correct usage: flipbyte.exe <0-255>" << endl;
-		return 1;
+		error = ParseNumberError::NotANumber;
 	}
-	catch (const out_of_range& e)
+	catch (const out_of_range & e)
 	{
-		cout << "Correct usage: flipbyte.exe <0-255>" << endl;
-		return 1;
+		error = ParseNumberError::OutOfRange;
 	}
 
-	if ((intNumber < 0) || (intNumber > 255))
-	{
-		cout << "Number " << intNumber << " is out of range [0..255]" << endl;
-		return 1;
-	}
+	return number;
+}
 
-	unsigned char number = static_cast<char>(intNumber);
-	unsigned char reversedNumber = 0;
-	int bitNumber = 8;
-	for (int i = 0; i < bitNumber; i++)
+string GetParseNumberErrorAsString(const ParseNumberError & error)
+{
+	string errorString;
+	switch (error)
 	{
-		reversedNumber <<= 1;
-		reversedNumber |= ((number >> i) & 0x01);
+		case ParseNumberError::NoError:
+			errorString = "";
+			break;
+		case ParseNumberError::NotANumber:
+			errorString = "Error: argument must be a number";
+			break;
+		case ParseNumberError::OutOfRange:
+			errorString = "Error: number must be in range <0, " + to_string(MAX_VALUE) + ">";
+			break;
+		default:
+			errorString = "Error: unknown error";
+			break;
 	}
-	cout << to_string(reversedNumber) << endl;
-	return 0;
+	return errorString;
+}
+
+Number FlipNumber(const Number & number)
+{
+	Number flippedNumber = 0;
+	for (auto i = 0; i < BIT_NUMBER; i++)
+	{
+		flippedNumber <<= 1;
+		flippedNumber |= ((number >> i) & 0x01);
+	}
+	return flippedNumber;
 }
