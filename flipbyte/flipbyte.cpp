@@ -1,23 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <limits>
 
 using namespace std;
 
-typedef uint8_t Number;
-const auto BIT_NUMBER = 8;
-const auto MIN_VALUE = 0;
-const auto MAX_VALUE = pow(2, BIT_NUMBER) - 1;
+const auto BIT_NUMBER = std::numeric_limits<uint8_t>::digits;
+const auto MIN_VALUE = std::numeric_limits<uint8_t>::min();
+const auto MAX_VALUE = std::numeric_limits<uint8_t>::max();
 
-enum class ParseNumberError {
-	NoError,
-	NotANumber,
-	OutOfRange
-};
-
-Number ParseNumberFromString(const string numberAsString, ParseNumberError & error);
-string GetParseNumberErrorAsString(const ParseNumberError & error);
-Number FlipNumber(const Number & number);
+uint8_t StringToUint(const string & numberAsString);
+uint8_t FlipUint(uint8_t number);
 
 int main(int argc, char* argv[])
 {
@@ -28,75 +21,45 @@ int main(int argc, char* argv[])
 	}
 	string numberAsString = argv[1];
 
-	ParseNumberError error = ParseNumberError::NoError;
-	Number originNumber = ParseNumberFromString(numberAsString, error);
-	if (error != ParseNumberError::NoError)
+	try
 	{
-		cout << GetParseNumberErrorAsString(error) << endl;
+		uint8_t originNumber = StringToUint(numberAsString);
+		int flippedNumber = FlipUint(originNumber);
+		cout << to_string(flippedNumber) << endl;
+	}
+	catch (const invalid_argument & e)
+	{
+		cout << "Error: argument must be a number" << endl;
 		return 1;
 	}
-	else
+	catch (const out_of_range & e)
 	{
-		int flippedNumber = FlipNumber(originNumber);
-		cout << to_string(flippedNumber) << endl;
+		cout << "Error: number must be in range <" + to_string(MIN_VALUE) + ", " + to_string(MAX_VALUE) + ">" << endl;
+		return 1;
 	}
 	return 0;
 }
 
-Number ParseNumberFromString(const string numberAsString, ParseNumberError & error)
+uint8_t StringToUint(const string & numberAsString)
 {
 	int intNumber = MIN_VALUE;
-	Number number = MIN_VALUE;
-	error = ParseNumberError::NoError;
-
-	try
+	uint8_t number = MIN_VALUE;
+	intNumber = stoi(numberAsString);
+	if ((intNumber < MIN_VALUE) || (intNumber > MAX_VALUE))
 	{
-		intNumber = stoi(numberAsString);
-		if ((intNumber < MIN_VALUE) || (intNumber > MAX_VALUE))
-		{
-			error = ParseNumberError::OutOfRange;
-		}
-		else
-		{
-			number = static_cast<Number>(intNumber);
-		}
+		throw std::out_of_range("out of range");
 	}
-	catch (const invalid_argument & e)
+	else
 	{
-		error = ParseNumberError::NotANumber;
-	}
-	catch (const out_of_range & e)
-	{
-		error = ParseNumberError::OutOfRange;
+		number = static_cast<uint8_t>(intNumber);
 	}
 
 	return number;
 }
 
-string GetParseNumberErrorAsString(const ParseNumberError & error)
+uint8_t FlipUint(uint8_t number)
 {
-	string errorString;
-	switch (error)
-	{
-		case ParseNumberError::NoError:
-			errorString = "";
-			break;
-		case ParseNumberError::NotANumber:
-			errorString = "Error: argument must be a number";
-			break;
-		case ParseNumberError::OutOfRange:
-			errorString = "Error: number must be in range <" + to_string(MIN_VALUE) + ", " + to_string(MAX_VALUE) + ">";
-			break;
-		default:
-			errorString = "Error: unknown error";
-			break;
-	}
-	return errorString;
-}
-
-Number FlipNumber(const Number & number)
-{
-	Number flippedNumber = 0;
+	uint8_t flippedNumber = 0;
 	for (auto i = 0; i < BIT_NUMBER; i++)
 	{
 		flippedNumber <<= 1;
